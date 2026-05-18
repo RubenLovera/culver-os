@@ -1,0 +1,10 @@
+[Unit]
+Description=Vault Ingest Timer — runs at 12:00 UTC daily
+Requires=vault-ingest.service
+
+[Timer]
+OnCalendar=*-*-* 12:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

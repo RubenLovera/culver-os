@@ -1,0 +1,12 @@
+[Unit]
+Description=Weekly Planning — Sunday ritual
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.admin
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python3 {{CULVER_OS_DIR}}/scripts/weekly-planning.py
+StandardOutput=journal
+StandardError=journal

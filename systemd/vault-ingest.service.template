@@ -1,0 +1,12 @@
+[Unit]
+Description=Vault Ingest — Updates wiki from raw sources
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.admin
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python3 {{CULVER_OS_DIR}}/scripts/vault-ingest.py
+StandardOutput=journal
+StandardError=journal

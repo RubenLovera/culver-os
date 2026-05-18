@@ -1,0 +1,10 @@
+[Unit]
+Description=Log Rotate Timer — runs at 04:05 UTC daily
+Requires=log-rotate.service
+
+[Timer]
+OnCalendar=*-*-* 04:05:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Vault Health Timer — runs at 13:30 UTC daily
+Requires=vault-health.service
+
+[Timer]
+OnCalendar=*-*-* 13:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

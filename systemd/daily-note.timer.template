@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Note Timer — runs at 11:55 UTC
+Requires=daily-note.service
+
+[Timer]
+OnCalendar=*-*-* 11:55:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

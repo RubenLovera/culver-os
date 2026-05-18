@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Planning Timer — Sunday 15:00 UTC
+Requires=weekly-planning.service
+
+[Timer]
+OnCalendar=Sun *-*-* 15:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

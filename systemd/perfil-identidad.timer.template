@@ -1,0 +1,10 @@
+[Unit]
+Description=Perfil Identidad Timer — Sunday 15:50 UTC
+Requires=perfil-identidad.service
+
+[Timer]
+OnCalendar=Sun *-*-* 15:50:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

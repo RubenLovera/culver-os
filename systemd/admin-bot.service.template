@@ -1,0 +1,18 @@
+[Unit]
+Description={{AGENT_NAME}} Bot — Personal AI OS Admin Agent
+After=network.target chroma-server.service
+Wants=chroma-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.admin
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python3 {{CULVER_OS_DIR}}/agents/admin_bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

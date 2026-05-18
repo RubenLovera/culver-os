@@ -1,0 +1,10 @@
+[Unit]
+Description=Status Operativo Timer — Sunday 15:40 UTC
+Requires=status-operativo-sun.service
+
+[Timer]
+OnCalendar=Sun *-*-* 15:40:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

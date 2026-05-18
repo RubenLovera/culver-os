@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  chroma-server:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_data:/chroma/chroma
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  admin-bot:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile
+    env_file: .env.admin
+    restart: always
+    depends_on:
+      chroma-server:
+        condition: service_healthy
+    volumes:
+      - ./vaults:/root/culver-os/vaults:ro
+      - ./action_log.jsonl:/root/culver-os/action_log.jsonl
+      - ./identity.md:/root/culver-os/identity.md:ro
+      - ./user.md:/root/culver-os/user.md:ro
+
+volumes:
+  chroma_data:

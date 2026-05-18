@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Fill Timer — Sunday 15:20 UTC
+Requires=weekly-fill.service
+
+[Timer]
+OnCalendar=Sun *-*-* 15:20:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

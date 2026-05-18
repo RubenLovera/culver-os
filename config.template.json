@@ -1,0 +1,49 @@
+{
+  "user": {
+    "name": "{{USER_NAME}}",
+    "timezone": "{{TIMEZONE}}",
+    "email": "{{EMAIL}}"
+  },
+  "agent": {
+    "name": "{{AGENT_NAME}}",
+    "brain_name": "{{BRAIN_NAME}}"
+  },
+  "projects": [
+    {
+      "name": "{{PROJECT_1_NAME}}",
+      "description": "{{PROJECT_1_DESC}}"
+    }
+  ],
+  "daily_note": {
+    "habits": ["{{HABIT_1}}", "{{HABIT_2}}"],
+    "sections": ["{{SECTION_1}}"]
+  },
+  "vps": {
+    "ip": "{{VPS_IP}}",
+    "provider": "hostinger",
+    "ssh_key": "{{SSH_KEY_PATH}}",
+    "ssh_user": "root",
+    "culver_os_dir": "/root/culver-os"
+  },
+  "telegram": {
+    "group_id": "{{GROUP_ID}}",
+    "bots": {
+      "admin": {
+        "token": "{{ADMIN_BOT_TOKEN}}",
+        "thread_id": "{{ADMIN_THREAD_ID}}"
+      }
+    }
+  },
+  "github": {
+    "username": "{{GITHUB_USERNAME}}",
+    "pat": "{{GITHUB_PAT}}"
+  },
+  "llm": {
+    "gemini_key": "{{GEMINI_KEY}}"
+  },
+  "obsidian": {
+    "vault_path": "{{OBSIDIAN_VAULT_PATH}}",
+    "daily_notes_subdir": "Daily Notes",
+    "weekly_reviews_subdir": "Weekly Reviews"
+  }
+}
