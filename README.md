@@ -10,7 +10,9 @@ CulverOS gives you a 24/7 personal AI agent running on your own VPS — with a s
 
 - **Admin agent** — your personal AI, named by you, running 24/7 on Telegram
 - **CulverBrain v3.0** — 6 memory layers: semantic knowledge base, interaction memory, action audit log
-- **12 automated timers** — daily notes, vault ingestion, weekly planning, brain sync
+- **LLM-wiki** — automatic pipeline that converts your notes and sources into structured knowledge (inspired by [Karpathy's LLM-wiki](https://gist.github.com/RubenLovera/bdd39168ebf57ba3a116c63997d4abd0))
+- **Two-vault architecture** — personal vault (your daily notes) + agent vault (AI-compiled wiki)
+- **13 automated timers** — daily notes, vault ingestion, weekly planning, brain sync
 - **Full ownership** — your VPS, your GitHub repos, your data
 
 ---
@@ -37,7 +39,7 @@ The onboarding wizard takes about 10 minutes and sets up everything.
 - A GitHub account with a Personal Access Token (repo + read:org scopes)
 - A VPS running Ubuntu 24.04 — [Hostinger](https://hostinger.com) works well (~$4/mo)
 - A Telegram account (for the bot)
-- A free Gemini API key from [aistudio.google.com](https://aistudio.google.com)
+- An LLM API key for the ingestion pipeline — Gemini (free at [aistudio.google.com](https://aistudio.google.com)), Claude, or OpenAI
 - [Obsidian](https://obsidian.md) Desktop (recommended, for notes sync)
 
 ---
@@ -77,6 +79,36 @@ curl | bash
 
 ---
 
+## LLM-Wiki — How your agent learns about you
+
+The LLM-wiki is the intelligence layer that makes your agent useful from day one.
+
+```
+You write in Obsidian (or anywhere)
+     ↓
+obsidian_sync connector copies notes to raw/
+     ↓
+vault-ingest.py (12:00 UTC daily):
+  → reads raw/ files not yet in log.md
+  → calls LLM → generates structured wiki pages in wiki/
+  → updates MASTER_INDEX.md + log.md
+  → pushes to GitHub (agent vault)
+     ↓
+vault-brain-sync.py (14:00 UTC daily):
+  → detects changed wiki/ files via git diff
+  → re-indexes into ChromaDB
+     ↓
+Your admin bot now knows what you wrote
+```
+
+**The difference from simple RAG:** your wiki *composes and accumulates*. RAG rediscovers from scratch each time. The wiki compounds — each entry links to related pages, and the agent can query it semantically.
+
+**LLM-agnostic:** works with Gemini, Claude, or OpenAI. Configure once in `config.json`.
+
+**Connectors extend what gets ingested:** Obsidian sync is pre-built. Notion, Gmail, GitHub, Granola → v1+. Build your own following `connectors/README.md`.
+
+---
+
 ## Skills
 
 | Skill | What it does |
@@ -87,6 +119,8 @@ curl | bash
 | `/culver-healthcheck` | Check all services + timers |
 | `/culver-daily` | Create today's daily note |
 | `/culver-weekly` | Generate weekly review |
+| `/culver-ingest` | Manually trigger vault ingestion |
+| `/culver-add-connector` | Enable or build a data connector |
 | `/culver-brain-sync` | Re-index vaults into ChromaDB |
 | `/culver-connect-agent` | Connect your own bot to the brain |
 | `/culver-uninstall` | Remove CulverOS from this machine |
@@ -112,7 +146,8 @@ VPS (24/7)
 
 GitHub (private)
 ├── {you}/culver-os-{you}          ← your parametrized instance
-└── {you}/agent-vault              ← your wiki + raw sources
+├── {you}/personal-vault           ← your daily notes (synced by Obsidian Git)
+└── {you}/agent-vault              ← AI-compiled wiki + raw sources
 ```
 
 ---

@@ -148,23 +148,81 @@ rm /tmp/.env.admin
 
 ---
 
-## Step 6: Create vault directories and clone agent-vault
+## Step 6: Create vault directories and clone both vaults
 
 ```bash
 GITHUB_PAT=$(python3 -c "import json; c=json.load(open('$HOME/.culver/config.json')); print(c['github']['pat'])")
 GITHUB_USER=$(python3 -c "import json; c=json.load(open('$HOME/.culver/config.json')); print(c['github']['username'])")
+AGENT_VAULT_REPO=$(python3 -c "import json; c=json.load(open('$HOME/.culver/config.json')); print(c['agent_vault']['github_repo'].split('/')[-1])" 2>/dev/null || echo "agent-vault")
 
 $SSH "
 mkdir -p $CULVER_OS_DIR/vaults
 
+# Clone personal-vault
+PERSONAL_VAULT_URL='https://$GITHUB_PAT@github.com/$GITHUB_USER/personal-vault.git'
+if [ -d '$CULVER_OS_DIR/vaults/personal-vault/.git' ]; then
+  git -C $CULVER_OS_DIR/vaults/personal-vault pull --rebase --quiet
+  echo '✅ personal-vault updated'
+else
+  git clone --quiet \$PERSONAL_VAULT_URL $CULVER_OS_DIR/vaults/personal-vault 2>/dev/null && \
+    echo '✅ personal-vault cloned' || \
+    echo '⚠️  personal-vault empty — will be populated by Obsidian Git plugin'
+fi
+
 # Clone agent-vault
-AGENT_VAULT_URL='https://$GITHUB_PAT@github.com/$GITHUB_USER/agent-vault.git'
-if [ -d '$CULVER_OS_DIR/vaults/agent-vault/.git' ]; then
-  git -C $CULVER_OS_DIR/vaults/agent-vault pull --rebase --quiet
+AGENT_VAULT_URL='https://$GITHUB_PAT@github.com/$GITHUB_USER/$AGENT_VAULT_REPO.git'
+if [ -d '$CULVER_OS_DIR/vaults/$AGENT_VAULT_REPO/.git' ]; then
+  git -C $CULVER_OS_DIR/vaults/$AGENT_VAULT_REPO pull --rebase --quiet
   echo '✅ agent-vault updated'
 else
-  git clone --quiet \$AGENT_VAULT_URL $CULVER_OS_DIR/vaults/agent-vault
-  echo '✅ agent-vault cloned'
+  git clone --quiet \$AGENT_VAULT_URL $CULVER_OS_DIR/vaults/$AGENT_VAULT_REPO 2>/dev/null || \
+    mkdir -p $CULVER_OS_DIR/vaults/$AGENT_VAULT_REPO
+  echo '✅ agent-vault ready'
+fi
+"
+```
+
+**Initialize agent vault structure** if this is a fresh vault (no CLAUDE.md yet):
+
+```bash
+$SSH "
+AGENT_PATH=$CULVER_OS_DIR/vaults/$AGENT_VAULT_REPO
+
+if [ ! -f \"\$AGENT_PATH/CLAUDE.md\" ]; then
+  echo 'Initializing agent vault structure...'
+  cd $CULVER_OS_DIR
+  source venv/bin/activate
+
+  # Copy templates to agent vault
+  mkdir -p \$AGENT_PATH/raw/articles \$AGENT_PATH/raw/transcripts \$AGENT_PATH/raw/notes \$AGENT_PATH/raw/personal_vault_sync
+  mkdir -p \$AGENT_PATH/wiki \$AGENT_PATH/outputs \$AGENT_PATH/index/supervisor-reports \$AGENT_PATH/_templates
+
+  cp $CULVER_OS_DIR/_templates/agent-vault-CLAUDE.md \$AGENT_PATH/CLAUDE.md
+  cp $CULVER_OS_DIR/_templates/MASTER_INDEX.md \$AGENT_PATH/index/MASTER_INDEX.md
+  cp $CULVER_OS_DIR/_templates/INGEST_QUEUE.md \$AGENT_PATH/index/INGEST_QUEUE.md
+  cp $CULVER_OS_DIR/_templates/agent-article.md \$AGENT_PATH/_templates/article.md
+  cp $CULVER_OS_DIR/_templates/agent-concept.md \$AGENT_PATH/_templates/concept.md
+
+  # Create empty log
+  TODAY=\$(date +%Y-%m-%d)
+  echo '# Agent Vault — Operations Log' > \$AGENT_PATH/index/log.md
+  echo '' >> \$AGENT_PATH/index/log.md
+  echo \"## [\$TODAY] init | vault initialized\" >> \$AGENT_PATH/index/log.md
+
+  # Parametrize CLAUDE.md with actual values
+  python3 $CULVER_OS_DIR/scripts/parametrize.py --config /tmp/culver-config.json --dir \$AGENT_PATH 2>/dev/null || true
+
+  # Commit and push initial structure
+  cd \$AGENT_PATH
+  git init --quiet 2>/dev/null || true
+  git remote add origin \$AGENT_VAULT_URL 2>/dev/null || true
+  git add -A
+  git commit -m 'init: agent vault structure from culver-bootstrap-vps' --quiet
+  git push origin main --quiet 2>/dev/null || git push origin master --quiet 2>/dev/null || true
+
+  echo '✅ Agent vault initialized and pushed'
+else
+  echo '✅ Agent vault already initialized'
 fi
 "
 ```

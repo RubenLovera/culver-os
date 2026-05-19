@@ -18,6 +18,31 @@
     "habits": ["{{HABIT_1}}", "{{HABIT_2}}"],
     "sections": ["{{SECTION_1}}"]
   },
+  "personal_vault": {
+    "github_repo": "{{GITHUB_USERNAME}}/personal-vault",
+    "local_path": "{{PERSONAL_VAULT_LOCAL_PATH}}",
+    "daily_notes_subdir": "Daily Notes",
+    "weekly_reviews_subdir": "Weekly Reviews"
+  },
+  "agent_vault": {
+    "github_repo": "{{GITHUB_USERNAME}}/{{AGENT_VAULT_REPO}}",
+    "local_path": "{{AGENT_VAULT_LOCAL_PATH}}",
+    "topics": ["{{TOPIC_1}}", "{{TOPIC_2}}"],
+    "raw_subdirs": ["articles", "transcripts", "notes", "personal_vault_sync"],
+    "wiki_subdirs": []
+  },
+  "llm": {
+    "provider": "{{LLM_PROVIDER}}",
+    "model": "{{LLM_MODEL}}",
+    "key": "{{LLM_API_KEY}}"
+  },
+  "connectors": {
+    "enabled": ["obsidian_sync"],
+    "obsidian_sync": {
+      "sync_folders": ["Daily Notes", "Weekly Reviews"],
+      "max_days": 30
+    }
+  },
   "vps": {
     "ip": "{{VPS_IP}}",
     "provider": "hostinger",
@@ -37,13 +62,5 @@
   "github": {
     "username": "{{GITHUB_USERNAME}}",
     "pat": "{{GITHUB_PAT}}"
-  },
-  "llm": {
-    "gemini_key": "{{GEMINI_KEY}}"
-  },
-  "obsidian": {
-    "vault_path": "{{OBSIDIAN_VAULT_PATH}}",
-    "daily_notes_subdir": "Daily Notes",
-    "weekly_reviews_subdir": "Weekly Reviews"
   }
 }

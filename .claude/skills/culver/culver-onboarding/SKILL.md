@@ -70,11 +70,13 @@ Questions to ask:
 3. What do you want to call your brain? (e.g. "cortex", "vault", "mind" — lowercase, no spaces) — prefix for your 3 ChromaDB collections
 4. What projects are you working on? (name + one-line description, up to 3)
 5. What habits do you want to track in your daily notes? (e.g. "Gym", "Meditation", "Reading")
-6. Do you have Obsidian Desktop installed? What is the path to your vault? (e.g. ~/Documents/MyVault)
+6. Do you have Obsidian Desktop installed? What is the path to your PERSONAL vault? (e.g. ~/Documents/MyVault) — this is where your daily notes, weekly reviews, and personal notes live.
 7. Do you have a GitHub account and a Personal Access Token (PAT) with repo + read:org scopes?
 8. Do you have a VPS? (If yes: IP address + path to SSH key. If no: recommend Hostinger — Ubuntu 24.04, ~$4/mo)
 9. Do you have a Telegram account and want to activate your admin bot? (If yes: give BotFather instructions to create the bot and get the token + group ID + thread ID)
-10. Do you have a Gemini API key? (Free at aistudio.google.com — takes 1 minute)
+10. Do you have an LLM API key for the ingestion pipeline? Options: Gemini (free at aistudio.google.com, recommended), Claude (anthropic.com), or OpenAI (platform.openai.com). Which do you prefer and what is your key?
+11. What topics or projects do you want to index in your wiki? (e.g. "beetransfer, crypto, personal-brand" — these become wiki/ subfolders in your agent vault)
+12. What name do you want for your agent vault GitHub repo? (default: "agent-vault") — this is where your AI-compiled wiki will live.
 
 ---
 
@@ -103,6 +105,7 @@ gh auth status 2>/dev/null || gh auth login
 # Read username from config
 GITHUB_USER=$(python3 -c "import json; c=json.load(open('$HOME/.culver/config.json')); print(c['github']['username'])")
 USERNAME=$(python3 -c "import json; c=json.load(open('$HOME/.culver/config.json')); print(c['user']['name'].lower().replace(' ', ''))")
+AGENT_VAULT_REPO=$(python3 -c "import json; c=json.load(open('$HOME/.culver/config.json')); print(c['agent_vault']['github_repo'].split('/')[-1])" 2>/dev/null || echo "agent-vault")
 
 echo "Creating repos for $GITHUB_USER..."
 
@@ -111,10 +114,30 @@ gh repo create "$GITHUB_USER/culver-os-$USERNAME" --private 2>/dev/null && \
   echo "✅ Created culver-os-$USERNAME" || \
   echo "ℹ️  culver-os-$USERNAME already exists — will pull"
 
-# agent-vault — wiki and raw sources
-gh repo create "$GITHUB_USER/agent-vault" --private 2>/dev/null && \
-  echo "✅ Created agent-vault" || \
-  echo "ℹ️  agent-vault already exists — will pull"
+# personal-vault — user's Obsidian notes (synced via Obsidian Git plugin)
+gh repo create "$GITHUB_USER/personal-vault" --private 2>/dev/null && \
+  echo "✅ Created personal-vault" || \
+  echo "ℹ️  personal-vault already exists"
+
+# agent-vault — AI-compiled wiki and raw sources
+gh repo create "$GITHUB_USER/$AGENT_VAULT_REPO" --private 2>/dev/null && \
+  echo "✅ Created $AGENT_VAULT_REPO" || \
+  echo "ℹ️  $AGENT_VAULT_REPO already exists — will pull"
+```
+
+After creating repos, guide the user to configure the **Obsidian Git plugin in BOTH vaults**:
+
+```
+For your PERSONAL vault:
+1. Open the personal vault in Obsidian
+2. Settings → Community Plugins → Browse → search "Obsidian Git" → install
+3. Settings: Auto save 1min, Auto pull 2min, Pull on startup: ON
+4. Run "Initialize repo" and connect to GitHub: {GITHUB_USER}/personal-vault
+
+For your AGENT vault (new, separate Obsidian vault):
+1. Create a new vault at the path configured above (or let bootstrap-vps initialize it)
+2. Install Obsidian Git plugin the same way
+3. Connect to GitHub: {GITHUB_USER}/{AGENT_VAULT_REPO}
 ```
 
 ---
