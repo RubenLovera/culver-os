@@ -1,5 +1,7 @@
 # CulverOS
 
+![CulverOS](assets/culver-os-logo.png)
+
 **A Personal AI Operating System you can install in one command.**
 
 CulverOS gives you a 24/7 personal AI agent running on your own VPS — with a semantic brain that knows your projects, your notes, and your commitments. Installed entirely through a conversation in Claude Code.
