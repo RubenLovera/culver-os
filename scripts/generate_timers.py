@@ -3,14 +3,15 @@
 generate_timers.py — Genera los archivos .service y .timer desde templates,
 reemplazando {{PLACEHOLDERS}} con los valores del config.json.
 
-Corre en el VPS durante /culver-bootstrap-vps.
+En VPS (Linux): escribe en /etc/systemd/system/ y activa los timers.
+En local (Mac/Windows): escribe en deploy/output/systemd/ para inspección.
 
 Uso:
   python3 scripts/generate_timers.py ~/.culver/config.json
 """
 
 import json
-import os
+import platform
 import subprocess
 import sys
 from pathlib import Path
@@ -30,6 +31,9 @@ TIMERS = [
     "perfil-identidad",
     "monthly-planning",
 ]
+
+IS_LINUX = platform.system() == "Linux"
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def load_config(path: str) -> dict:
@@ -56,9 +60,17 @@ def apply_replacements(content: str, replacements: dict) -> str:
 def generate_timers(config_path: str):
     config = load_config(config_path)
     replacements = build_replacements(config)
-    culver_os_dir = config.get("vps", {}).get("culver_os_dir", "/root/culver-os")
-    templates_dir = Path(culver_os_dir) / "systemd"
-    systemd_dir = Path("/etc/systemd/system")
+
+    # Templates are always in <repo_root>/systemd/ — regardless of culver_os_dir
+    templates_dir = REPO_ROOT / "systemd"
+
+    # Output: /etc/systemd/system/ on VPS, deploy/output/systemd/ locally
+    if IS_LINUX:
+        systemd_dir = Path("/etc/systemd/system")
+    else:
+        systemd_dir = REPO_ROOT / "deploy" / "output" / "systemd"
+        systemd_dir.mkdir(parents=True, exist_ok=True)
+        print(f"  ℹ️  Local mode — output: {systemd_dir}\n")
 
     generated = []
 
@@ -77,16 +89,21 @@ def generate_timers(config_path: str):
             print(f"  ✅ Generated {output_file.name}")
             generated.append(output_file.name)
 
-    # Reload systemd and enable/start timers
-    print("\n🔄 Reloading systemd daemon...")
-    subprocess.run(["systemctl", "daemon-reload"], check=True)
+    timer_count = len([n for n in generated if n.endswith(".timer")])
 
-    for name in generated:
-        if name.endswith(".timer"):
-            subprocess.run(["systemctl", "enable", "--now", name], check=True)
-            print(f"  ✅ Enabled and started {name}")
+    if IS_LINUX:
+        print("\n🔄 Reloading systemd daemon...")
+        subprocess.run(["systemctl", "daemon-reload"], check=True)
 
-    print(f"\n✅ {len([n for n in generated if n.endswith('.timer')])} timers active.")
+        for name in generated:
+            if name.endswith(".timer"):
+                subprocess.run(["systemctl", "enable", "--now", name], check=True)
+                print(f"  ✅ Enabled and started {name}")
+
+        print(f"\n✅ {timer_count} timers active.")
+    else:
+        print(f"\n✅ {timer_count} timers generated. Copy to /etc/systemd/system/ on your VPS.")
+        print(f"   Files in: {systemd_dir}")
 
 
 if __name__ == "__main__":
