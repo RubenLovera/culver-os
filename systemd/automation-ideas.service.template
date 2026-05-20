@@ -1,0 +1,12 @@
+[Unit]
+Description=Automation Ideas — Generates daily automation ideas per project
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.admin
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python3 {{CULVER_OS_DIR}}/scripts/automation-ideas.py
+StandardOutput=journal
+StandardError=journal

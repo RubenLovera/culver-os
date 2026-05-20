@@ -1,0 +1,10 @@
+[Unit]
+Description=Vault Brain Sync Timer — runs at 14:00 UTC daily
+Requires=vault-brain-sync.service
+
+[Timer]
+OnCalendar=*-*-* 14:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

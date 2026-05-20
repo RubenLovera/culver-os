@@ -1,0 +1,10 @@
+[Unit]
+Description=Automation Ideas Timer — runs at 02:01 UTC daily
+Requires=automation-ideas.service
+
+[Timer]
+OnCalendar=*-*-* 02:01:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
