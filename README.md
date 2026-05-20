@@ -44,11 +44,40 @@ The onboarding wizard takes about 10 minutes and sets up everything.
 - An LLM API key for the ingestion pipeline — Gemini (free at [aistudio.google.com](https://aistudio.google.com)), Claude, or OpenAI
 - [Obsidian](https://obsidian.md) Desktop (recommended, for notes sync)
 
+The install script also installs [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) automatically — 5 skills that make Claude Code an expert at working with Obsidian vaults:
+
+| Skill | What it does |
+|-------|-------------|
+| `obsidian-markdown` | Create and edit Obsidian Flavored Markdown — wikilinks, callouts, embeds, properties |
+| `obsidian-bases` | Create and edit Obsidian Bases (.base) — views, filters, formulas, summaries |
+| `json-canvas` | Create and edit JSON Canvas files (.canvas) — visual nodes, edges, connections |
+| `obsidian-cli` | Interact with vaults via the Obsidian CLI — plugin/theme dev, vault operations |
+| `defuddle` | Extract clean markdown from web pages — removes clutter to save tokens |
+
+To install them separately: `npx skills add https://github.com/kepano/obsidian-skills`
+
 ---
 
 ## Manual setup walkthrough
 
 This is what you'll see in your terminal when setting up CulverOS for the first time. No credentials needed until you deploy to VPS.
+
+### 0. Install Obsidian skills
+
+```bash
+npx skills add https://github.com/kepano/obsidian-skills
+```
+
+Output:
+```
+✅ obsidian-markdown installed
+✅ obsidian-bases installed
+✅ json-canvas installed
+✅ obsidian-cli installed
+✅ defuddle installed
+```
+
+These skills are also installed automatically by `install.sh`. Once installed, Claude Code knows how to create wikilinks, Bases, Canvases, and interact with Obsidian vaults — the same capability used by the vault-ingest pipeline.
 
 ### 1. Clone and configure
 

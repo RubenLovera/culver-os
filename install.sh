@@ -45,6 +45,20 @@ if ! command -v bun &>/dev/null; then
   echo "✅ bun installed"
 fi
 
+# ── Obsidian skills (kepano) ──────────────────────────────────────────────
+
+echo "📚 Installing Obsidian skills (kepano/obsidian-skills)..."
+if command -v npx &>/dev/null; then
+  npx skills add https://github.com/kepano/obsidian-skills --quiet 2>/dev/null \
+    || npx skills add https://github.com/kepano/obsidian-skills 2>&1 | tail -1 \
+    || echo "⚠️  Could not install obsidian-skills automatically."
+  echo "   Skills installed: obsidian-markdown, obsidian-bases, json-canvas, obsidian-cli, defuddle"
+  echo "   Source: https://github.com/kepano/obsidian-skills"
+else
+  echo "⚠️  npx not found — install obsidian skills manually:"
+  echo "   npx skills add https://github.com/kepano/obsidian-skills"
+fi
+
 # ── Clonar o actualizar el repo ────────────────────────────────────────────
 
 if [ -d "$SKILLS_DIR/.git" ]; then
