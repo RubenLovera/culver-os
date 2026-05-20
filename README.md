@@ -169,6 +169,14 @@ systemctl enable --now admin-bot
 for f in /etc/systemd/system/*.timer; do systemctl enable --now "$(basename $f)"; done
 ```
 
+### What's next after installation
+
+Once your VPS is running and your bots are live, the next step is feeding the system with your knowledge.
+
+→ **[Feeding Your Brain — complete guide](docs/feeding-your-brain.md)**
+
+This guide covers: writing in Obsidian, Obsidian Web Clipper, manual drops into `raw/`, automated connectors, a cold-start checklist, and how to open the graph view to see your second brain visually.
+
 ---
 
 ## How it works
