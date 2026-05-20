@@ -1,0 +1,20 @@
+[Unit]
+Description=Finno Bot — CFO Financial Agent
+After=network.target admin-bot.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.finno
+Environment=PYTHONPATH={{CULVER_OS_DIR}}
+Environment=CONFIG_PATH={{CULVER_OS_DIR}}/config.json
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python agents/finno_bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

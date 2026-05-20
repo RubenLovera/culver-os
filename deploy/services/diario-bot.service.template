@@ -1,0 +1,21 @@
+[Unit]
+Description=Diario Bot — Personal Notes Agent
+After=network.target admin-bot.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.diario
+Environment=PYTHONPATH={{CULVER_OS_DIR}}
+Environment=CONFIG_PATH={{CULVER_OS_DIR}}/config.json
+Environment=DIARIO_STATE_FILE={{CULVER_OS_DIR}}/diario_state.json
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python agents/diario_bot.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

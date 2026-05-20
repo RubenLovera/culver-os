@@ -1,0 +1,20 @@
+[Unit]
+Description=Log Watcher — Real-time error monitor for all bots
+After=network.target admin-bot.service diario-bot.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory={{CULVER_OS_DIR}}
+EnvironmentFile={{CULVER_OS_DIR}}/.env.admin
+Environment=PYTHONPATH={{CULVER_OS_DIR}}
+Environment=CONFIG_PATH={{CULVER_OS_DIR}}/config.json
+ExecStart={{CULVER_OS_DIR}}/venv/bin/python agents/log_watcher.py
+Restart=on-failure
+RestartSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

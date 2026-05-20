@@ -15,14 +15,16 @@
     }
   ],
   "daily_note": {
-    "habits": ["{{HABIT_1}}", "{{HABIT_2}}"],
-    "sections": ["{{SECTION_1}}"]
+    "habits": ["{{HABIT_1}}", "{{HABIT_2}}", "{{HABIT_3}}"],
+    "ventures": ["{{VENTURE_1}}", "{{VENTURE_2}}"],
+    "verses": false
   },
   "personal_vault": {
     "github_repo": "{{GITHUB_USERNAME}}/personal-vault",
     "local_path": "{{PERSONAL_VAULT_LOCAL_PATH}}",
-    "daily_notes_subdir": "Daily Notes",
-    "weekly_reviews_subdir": "Weekly Reviews"
+    "daily_notes_dir": "Daily Notes",
+    "weekly_reviews_dir": "Weekly Reviews",
+    "monthly_reviews_dir": "Monthly Reviews"
   },
   "agent_vault": {
     "github_repo": "{{GITHUB_USERNAME}}/{{AGENT_VAULT_REPO}}",
@@ -56,6 +58,48 @@
       "admin": {
         "token": "{{ADMIN_BOT_TOKEN}}",
         "thread_id": "{{ADMIN_THREAD_ID}}"
+      },
+      "diario": {
+        "token": "{{DIARIO_BOT_TOKEN}}",
+        "thread_id": "{{DIARIO_THREAD_ID}}"
+      },
+      "finno": {
+        "token": "{{FINNO_BOT_TOKEN}}",
+        "thread_id": "{{FINNO_THREAD_ID}}"
+      },
+      "jobs": {
+        "token": "{{JOBS_BOT_TOKEN}}",
+        "thread_id": "{{JOBS_THREAD_ID}}"
+      }
+    }
+  },
+  "paperclip": {
+    "url": "http://localhost:58209/api",
+    "company_id": "{{PAPERCLIP_COMPANY_ID}}",
+    "agents": {
+      "admin":  {"id": "{{PCP_ADMIN_AGENT_ID}}",  "token": "{{PCP_ADMIN_TOKEN}}"},
+      "diario": {"id": "{{PCP_DIARIO_AGENT_ID}}", "token": "{{PCP_DIARIO_TOKEN}}"},
+      "finno":  {"id": "{{PCP_FINNO_AGENT_ID}}",  "token": "{{PCP_FINNO_TOKEN}}"},
+      "jobs":   {"id": "{{PCP_JOBS_AGENT_ID}}",   "token": "{{PCP_JOBS_TOKEN}}"}
+    }
+  },
+  "finno": {
+    "teller": {
+      "app_id": "{{TELLER_APP_ID}}",
+      "env": "development",
+      "cert_path": "{{CULVER_OS_DIR}}/certs/certificate.pem",
+      "key_path": "{{CULVER_OS_DIR}}/certs/private_key.pem"
+    },
+    "bybit": {
+      "api_key": "{{BYBIT_API_KEY}}",
+      "api_secret": "{{BYBIT_API_SECRET}}",
+      "use_tor": false
+    },
+    "blockchain": {
+      "etherscan_key": "{{ETHERSCAN_API_KEY}}",
+      "wallets": {
+        "btc": "{{BTC_WALLET_ADDRESS}}",
+        "evm": "{{EVM_WALLET_ADDRESS}}"
       }
     }
   },
