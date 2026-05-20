@@ -16,7 +16,7 @@ sys.path.insert(0, os.getenv("CULVER_OS_DIR", "/root/culver-os"))
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import google.generativeai as genai
+from google import genai
 
 from tools.brain import query as brain_query
 from tools.memory import (
@@ -47,7 +47,7 @@ DAILY_NOTES_DIR   = os.path.join(CULVER_OS_DIR, "vaults", "obsidian-vault", os.g
 WEEKLY_REVIEWS_DIR = os.path.join(CULVER_OS_DIR, "vaults", "obsidian-vault", os.getenv("WEEKLY_REVIEWS_SUBDIR", "Weekly Reviews"))
 MAX_HISTORY_TURNS = 20
 
-genai.configure(api_key=GEMINI_API_KEY)
+_client = genai.Client(api_key=GEMINI_API_KEY)
 
 # ── Keywords para routing de capas ────────────────────────────────────────────
 
@@ -86,20 +86,18 @@ def load_system_prompt() -> str:
 
 
 SYSTEM_PROMPT = load_system_prompt()
-model = genai.GenerativeModel(model_name=MODEL, system_instruction=SYSTEM_PROMPT)
 
-_chats: dict = {}
-
-
-def get_chat(user_id: int):
-    if user_id not in _chats:
-        _chats[user_id] = model.start_chat(history=[])
-    return _chats[user_id]
+_histories: dict = {}
 
 
-def trim_chat_history(chat):
-    if len(chat.history) > MAX_HISTORY_TURNS * 2:
-        chat.history = chat.history[-(MAX_HISTORY_TURNS * 2):]
+def get_history(user_id: int) -> list:
+    return _histories.setdefault(user_id, [])
+
+
+def trim_history(user_id: int):
+    h = _histories.get(user_id, [])
+    if len(h) > MAX_HISTORY_TURNS * 2:
+        _histories[user_id] = h[-(MAX_HISTORY_TURNS * 2):]
 
 
 # ── Context builders (6 capas) ────────────────────────────────────────────────
@@ -300,13 +298,23 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         augmented = text
 
     user_id = update.message.from_user.id
+    history = get_history(user_id)
+    history.append({"role": "user", "parts": [{"text": augmented}]})
+    trim_history(user_id)
+
     reply = None
     for attempt in range(3):
         try:
-            chat = get_chat(user_id)
-            trim_chat_history(chat)
-            resp = await chat.send_message_async(augmented)
+            resp = await asyncio.to_thread(
+                _client.models.generate_content,
+                model=MODEL,
+                contents=history,
+                config=genai.types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                ),
+            )
             reply = resp.text
+            history.append({"role": "model", "parts": [{"text": reply}]})
             break
         except Exception as e:
             if "429" in str(e) and attempt < 2:
@@ -315,6 +323,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await asyncio.sleep(wait)
             else:
                 logger.error(f"LLM call failed: {e}")
+                history.pop()
                 reply = "Error processing your message — please try again in a moment."
                 break
 
