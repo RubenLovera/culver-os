@@ -14,7 +14,7 @@ CulverOS gives you a 24/7 personal AI agent running on your own VPS — with a s
 - **CulverBrain v3.0** — 6 memory layers: semantic knowledge base, interaction memory, action audit log
 - **LLM-wiki** — automatic pipeline that converts your notes and sources into structured knowledge (inspired by [Karpathy's LLM-wiki](https://gist.github.com/RubenLovera/bdd39168ebf57ba3a116c63997d4abd0))
 - **Two-vault architecture** — personal vault (your daily notes) + agent vault (AI-compiled wiki)
-- **13 automated timers** — daily notes, vault ingestion, weekly planning, brain sync
+- **15 automated timers** — daily notes, vault ingestion, weekly planning, brain sync
 - **Full ownership** — your VPS, your GitHub repos, your data
 
 ---
@@ -46,6 +46,102 @@ The onboarding wizard takes about 10 minutes and sets up everything.
 
 ---
 
+## Manual setup walkthrough
+
+This is what you'll see in your terminal when setting up CulverOS for the first time. No credentials needed until you deploy to VPS.
+
+### 1. Clone and configure
+
+```bash
+git clone https://github.com/RubenLovera/culver-os.git
+cd culver-os
+cp config.template.json config.json
+```
+
+Edit `config.json` — replace all `{{PLACEHOLDER}}` values with your own. The required fields are: your name, timezone, Telegram bot tokens, GitHub PAT, and LLM API key. The rest can be filled in later.
+
+### 2. Generate your .env files
+
+```bash
+python3 scripts/generate_env.py config.json deploy/output/env/
+```
+
+Output:
+```
+✅ Generated deploy/output/env/.env.admin
+✅ Generated deploy/output/env/.env.diario
+```
+
+Two files are generated — one for the admin bot, one for the daily notes bot. Each contains the env vars that bot needs.
+
+### 3. Generate systemd timers
+
+```bash
+python3 scripts/generate_timers.py config.json
+```
+
+Output:
+```
+  ℹ️  Local mode — output: deploy/output/systemd
+
+  ✅ Generated log-rotate.service
+  ✅ Generated log-rotate.timer
+  ✅ Generated daily-note.service
+  ✅ Generated daily-note.timer
+  ✅ Generated vault-ingest.service
+  ✅ Generated vault-ingest.timer
+  ... (15 timers total)
+
+✅ 15 timers generated. Copy to /etc/systemd/system/ on your VPS.
+   Files in: deploy/output/systemd
+```
+
+This generates 30 files (service + timer unit for each automation) in `deploy/output/systemd/`. They are parametrized with your `config.json` values — vault paths, schedules, and agent names are all substituted.
+
+### 4. Verify locally
+
+```bash
+python3 tests/smoke_test.py
+```
+
+Output:
+```
+CulverOS Framework — Smoke Test
+========================================
+(no credentials required)
+
+[OK]   import tools.paperclip
+[OK]   import tools.obsidian
+[OK]   import tools.daily_note
+...
+[OK]   generate_timers.py TIMERS = 15
+[OK]   systemd templates count = 31
+
+74/74 tests passed  (3 skipped — VPS-only)
+```
+
+The 3 skipped tests (`chromadb`) are VPS-only — they pass on the server once ChromaDB is running.
+
+### 5. Deploy to VPS
+
+```bash
+# Copy generated files to your VPS
+scp deploy/output/env/.env.admin root@YOUR_VPS_IP:/root/culver-os/
+scp deploy/output/env/.env.diario root@YOUR_VPS_IP:/root/culver-os/
+scp deploy/output/systemd/* root@YOUR_VPS_IP:/etc/systemd/system/
+
+# On the VPS — clone the repo, install deps, enable timers
+ssh root@YOUR_VPS_IP
+cd /root && git clone https://github.com/RubenLovera/culver-os.git
+cd culver-os && python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+systemctl daemon-reload
+systemctl enable --now admin-bot
+for f in /etc/systemd/system/*.timer; do systemctl enable --now "$(basename $f)"; done
+```
+
+---
+
 ## How it works
 
 ```
@@ -62,7 +158,7 @@ curl | bash
 /culver-bootstrap-vps
   ├── installs docker + python on your VPS via SSH
   ├── starts ChromaDB + your admin bot (docker-compose)
-  └── enables all 12 systemd timers
+  └── enables all 15 systemd timers
 ```
 
 ---
@@ -143,7 +239,7 @@ VPS (24/7)
     ├── agents/admin_bot.py        ← your admin agent (Telegram)
     ├── tools/brain.py             ← ChromaDB client
     ├── tools/memory.py            ← Layers 5 + 6
-    ├── scripts/                   ← 12 automation scripts
+    ├── scripts/                   ← 15 automation scripts
     └── docker-compose.yml         ← ChromaDB + admin bot
 
 GitHub (private)
