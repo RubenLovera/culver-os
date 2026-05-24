@@ -43,6 +43,20 @@
     "obsidian_sync": {
       "sync_folders": ["Daily Notes", "Weekly Reviews"],
       "max_days": 30
+    },
+    "github": {
+      "repos": [],
+      "include": ["readme", "issues", "prs"],
+      "max_items": 50
+    },
+    "notion": {
+      "page_ids": [],
+      "database_ids": [],
+      "max_db_pages": 100
+    },
+    "granola": {
+      "export_dir": "{{GRANOLA_EXPORT_DIR}}",
+      "max_days": 30
     }
   },
   "vps": {

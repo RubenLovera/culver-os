@@ -4,28 +4,46 @@ Connectors read data from external sources and deposit files into the agent vaul
 
 ## Pre-built connectors
 
-| Connector | Source | Status |
-|-----------|--------|--------|
-| `obsidian_sync` | Personal Obsidian vault | ✅ MVP |
-| `notion` | Notion pages/databases | v1+ |
-| `gmail` | Gmail threads | v1+ |
-| `github` | Issues, PRs, READMEs | v1+ |
-| `granola` | Meeting notes | v1+ |
-| `fathom` | Call transcripts | v1+ |
+| Connector | Source | Requires | Status |
+|-----------|--------|----------|--------|
+| `obsidian_sync` | Personal Obsidian vault | `PERSONAL_VAULT_PATH` | ✅ |
+| `github` | Issues, PRs, READMEs | `GITHUB_PAT` (already in config) | ✅ |
+| `notion` | Notion pages/databases | `NOTION_API_KEY` | ✅ |
+| `granola` | Meeting transcripts (export folder) | local export dir | ✅ |
+| `gmail` | Gmail threads | `GMAIL_*` credentials | planned |
+| `fathom` | Call transcripts | `FATHOM_API_KEY` | planned |
 
 ## Enabling a connector
 
-In your `config.json`:
+Add the connector name to `connectors.enabled` in your `config.json`:
 
 ```json
 "connectors": {
-  "enabled": ["obsidian_sync"],
+  "enabled": ["obsidian_sync", "github"],
   "obsidian_sync": {
     "sync_folders": ["Daily Notes", "Weekly Reviews"],
+    "max_days": 30
+  },
+  "github": {
+    "repos": ["myuser/myrepo"],
+    "include": ["readme", "issues", "prs"],
+    "max_items": 50
+  },
+  "notion": {
+    "page_ids": ["your-page-id"],
+    "database_ids": [],
+    "max_db_pages": 100
+  },
+  "granola": {
+    "export_dir": "/path/to/granola-exports",
     "max_days": 30
   }
 }
 ```
+
+**Notion setup:** create an integration at https://www.notion.so/my-integrations, copy the API key to `NOTION_API_KEY` in your `.env.admin`, and share each page/database with the integration.
+
+**Granola setup:** Granola runs on Mac, not on the VPS. Populate `export_dir` by either: (a) setting Granola to export to a folder that syncs to your VPS via git, or (b) running `tools/export_granola.py` locally on your Mac.
 
 ## Building a connector
 
