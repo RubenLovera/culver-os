@@ -21,17 +21,13 @@ CulverOS gives you a 24/7 personal AI agent running on your own VPS — with a s
 
 ## Install
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/RubenLovera/culver-os/main/install.sh | bash
-```
-
-Then open Claude Code and run:
+Open Claude Code and paste this:
 
 ```
-/culver-onboarding
+Install my Personal AI OS: run curl -fsSL https://raw.githubusercontent.com/RubenLovera/culver-os/main/install.sh | bash then immediately read and follow ~/.claude/skills/culver/culver-onboarding/SKILL.md from start to finish — check prerequisites, ask me the setup questions, generate my config, create my GitHub repos, and deploy my VPS bots.
 ```
 
-The onboarding wizard takes about 10 minutes and sets up everything.
+That's it. Claude Code runs the installer, asks you 10 questions, and sets up everything end-to-end in about 10 minutes.
 
 ---
 

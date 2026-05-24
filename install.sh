@@ -7,15 +7,33 @@ set -e
 
 SKILLS_DIR="$HOME/.claude/skills/culver"
 REPO_URL="https://github.com/RubenLovera/culver-os"
-REPO_RAW="https://raw.githubusercontent.com/RubenLovera/culver-os/main"
+
+# ── Colors ────────────────────────────────────────────────────────────────────
+
+if [ -t 1 ]; then
+  ORANGE='\033[38;5;214m'
+  DIM='\033[2m'
+  BOLD='\033[1m'
+  RESET='\033[0m'
+else
+  ORANGE='' DIM='' BOLD='' RESET=''
+fi
+
+# ── Logo ──────────────────────────────────────────────────────────────────────
 
 echo ""
-echo "╔══════════════════════════════════════════╗"
-echo "║       CulverOS — Installing Skills       ║"
-echo "╚══════════════════════════════════════════╝"
+printf "${ORANGE}"
+printf '%s\n' ' ██████╗██╗   ██╗██╗     ██╗   ██╗███████╗██████╗    ██████╗ ███████╗'
+printf '%s\n' '██╔════╝██║   ██║██║     ██║   ██║██╔════╝██╔══██╗  ██╔═══██╗██╔════╝'
+printf '%s\n' '██║     ██║   ██║██║     ╚██╗ ██╔╝█████╗  ██████╔╝  ██║   ██║███████╗'
+printf '%s\n' '██║     ██║   ██║██║      ╚████╔╝ ██╔══╝  ██╔══██╗  ██║   ██║╚════██║'
+printf '%s\n' '╚██████╗╚██████╔╝███████╗  ╚██╔╝  ███████╗██║  ██║  ╚██████╔╝███████║'
+printf '%s\n' ' ╚═════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═════╝ ╚══════╝'
+printf "${RESET}"
+printf "${DIM}%s${RESET}\n" '  v1.0  ·  Personal AI OS  ·  github.com/RubenLovera/culver-os'
 echo ""
 
-# ── Verificar Claude Code ──────────────────────────────────────────────────
+# ── Verificar Claude Code ──────────────────────────────────────────────────────
 
 if ! command -v claude &>/dev/null; then
   echo "❌ Claude Code not found."
@@ -24,75 +42,68 @@ if ! command -v claude &>/dev/null; then
   exit 1
 fi
 
-# ── Verificar git ──────────────────────────────────────────────────────────
+# ── Verificar git ──────────────────────────────────────────────────────────────
 
 if ! command -v git &>/dev/null; then
   echo "❌ git not found. Please install git and try again."
   exit 1
 fi
 
-# ── Detectar bun (necesario para build de skills) ─────────────────────────
+# ── Detectar bun ──────────────────────────────────────────────────────────────
 
 if ! command -v bun &>/dev/null; then
-  echo "📦 bun not found — installing..."
+  echo "📦 Installing bun..."
   curl -fsSL https://bun.sh/install | bash
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"
   if ! command -v bun &>/dev/null; then
-    echo "❌ bun installation failed. Please install manually: https://bun.sh"
+    echo "❌ bun installation failed. Install manually: https://bun.sh"
     exit 1
   fi
   echo "✅ bun installed"
 fi
 
-# ── Obsidian skills (kepano) ──────────────────────────────────────────────
+# ── Obsidian skills (kepano) ──────────────────────────────────────────────────
 
-echo "📚 Installing Obsidian skills (kepano/obsidian-skills)..."
+echo "📚 Installing Obsidian skills..."
 if command -v npx &>/dev/null; then
   npx skills add https://github.com/kepano/obsidian-skills --quiet 2>/dev/null \
     || npx skills add https://github.com/kepano/obsidian-skills 2>&1 | tail -1 \
-    || echo "⚠️  Could not install obsidian-skills automatically."
-  echo "   Skills installed: obsidian-markdown, obsidian-bases, json-canvas, obsidian-cli, defuddle"
-  echo "   Source: https://github.com/kepano/obsidian-skills"
+    || echo "⚠️  Could not install obsidian-skills — install manually: npx skills add https://github.com/kepano/obsidian-skills"
 else
-  echo "⚠️  npx not found — install obsidian skills manually:"
-  echo "   npx skills add https://github.com/kepano/obsidian-skills"
+  echo "⚠️  npx not found — install obsidian skills manually: npx skills add https://github.com/kepano/obsidian-skills"
 fi
 
-# ── Clonar o actualizar el repo ────────────────────────────────────────────
+# ── Clonar o actualizar ────────────────────────────────────────────────────────
 
 if [ -d "$SKILLS_DIR/.git" ]; then
   echo "📂 Existing installation found — updating..."
   git -C "$SKILLS_DIR" pull --rebase --quiet
   echo "✅ Updated to latest"
 else
-  echo "📥 Cloning CulverOS skills..."
+  echo "📥 Cloning CulverOS..."
   mkdir -p "$HOME/.claude/skills"
   git clone --quiet "$REPO_URL" "$SKILLS_DIR"
   echo "✅ Cloned to $SKILLS_DIR"
 fi
 
-# ── Build de skills ────────────────────────────────────────────────────────
+# ── Build ──────────────────────────────────────────────────────────────────────
 
 if [ -f "$SKILLS_DIR/package.json" ]; then
-  echo "🔨 Building skills..."
+  echo "🔨 Building..."
   cd "$SKILLS_DIR"
   bun install --quiet
   bun run build --quiet 2>/dev/null || true
-  echo "✅ Build complete"
 fi
 
-# ── Done ───────────────────────────────────────────────────────────────────
+# ── Done ───────────────────────────────────────────────────────────────────────
 
 echo ""
-echo "✅ CulverOS skills installed successfully!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Next step: open Claude Code and run"
+printf "${BOLD}%s${RESET}\n" "  Your OS is installed. Paste this into Claude Code to start setup:"
 echo ""
-echo "    /culver-onboarding"
+printf "${ORANGE}%s${RESET}\n" "  Start setting up my Personal AI OS: read and follow ~/.claude/skills/culver/culver-onboarding/SKILL.md from start to finish — check prerequisites, ask me the setup questions, generate my config, create my GitHub repos, and deploy my VPS bots."
 echo ""
-echo "  This will set up your Personal AI OS"
-echo "  in about 10 minutes."
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
