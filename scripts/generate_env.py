@@ -107,6 +107,7 @@ def main():
 
     config_path = sys.argv[1]
     output_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(".")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     config = load_config(config_path)
 

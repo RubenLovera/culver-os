@@ -14,7 +14,7 @@ import time
 import uuid
 
 import chromadb
-import google.generativeai as genai
+import google.genai as genai
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
@@ -185,8 +185,7 @@ def extract_interaction(
     if not GEMINI_API_KEY:
         return None
 
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(MODEL)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     few_shot = (
         "Examples:\n"
@@ -207,9 +206,10 @@ def extract_interaction(
     )
 
     try:
-        response = model.generate_content(
-            EXTRACTION_SYSTEM_PROMPT + "\n\n" + prompt,
-            generation_config={"response_mime_type": "application/json"},
+        response = client.models.generate_content(
+            model=MODEL,
+            contents=EXTRACTION_SYSTEM_PROMPT + "\n\n" + prompt,
+            config={"response_mime_type": "application/json"},
         )
         data = json.loads(response.text.strip())
     except Exception:
