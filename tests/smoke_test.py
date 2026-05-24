@@ -90,7 +90,38 @@ def test_llm_imports():
             fail(f"import {mod}", e)
 
 
-# --- 3. Agent syntax ---
+# --- 3. Connector imports + registry ---
+
+def test_connector_imports():
+    """Connectors must import cleanly with no credentials required."""
+    connector_mods = [
+        "connectors.base",
+        "connectors.obsidian_sync",
+        "connectors.github",
+        "connectors.notion",
+        "connectors.granola",
+    ]
+    for mod in connector_mods:
+        try:
+            __import__(mod)
+            ok(f"import {mod}")
+        except Exception as e:
+            fail(f"import {mod}", e)
+
+    # REGISTRY must contain all expected connectors
+    try:
+        from connectors import REGISTRY
+        expected = {"obsidian_sync", "github", "notion", "granola"}
+        for name in expected:
+            if name in REGISTRY:
+                ok(f"connectors.REGISTRY['{name}']")
+            else:
+                fail(f"connectors.REGISTRY['{name}']", "missing from REGISTRY")
+    except Exception as e:
+        fail("connectors.REGISTRY", e)
+
+
+# --- 5. Agent syntax ---
 
 def test_agent_syntax():
     """Agents need env vars to import — check syntax only via ast.parse."""
@@ -103,7 +134,7 @@ def test_agent_syntax():
             fail(f"syntax agents/{py_file.name}", e)
 
 
-# --- 4. Script syntax ---
+# --- 6. Script syntax ---
 
 def test_script_syntax():
     scripts_dir = REPO_ROOT / "scripts"
@@ -115,7 +146,7 @@ def test_script_syntax():
             fail(f"syntax scripts/{py_file.name}", e)
 
 
-# --- 5. config.template.json ---
+# --- 7. config.template.json ---
 
 def test_config_template():
     config_path = REPO_ROOT / "config.template.json"
@@ -156,7 +187,7 @@ def test_config_template():
         ok("config.template.json no empty values")
 
 
-# --- 6. generate_env.py ---
+# --- 8. generate_env.py ---
 
 def test_generate_env():
     script = REPO_ROOT / "scripts" / "generate_env.py"
@@ -176,7 +207,7 @@ def test_generate_env():
         fail("generate_env.py", e)
 
 
-# --- 7. generate_timers.py — TIMERS count ---
+# --- 9. generate_timers.py — TIMERS count ---
 
 def test_generate_timers():
     script = REPO_ROOT / "scripts" / "generate_timers.py"
@@ -191,7 +222,7 @@ def test_generate_timers():
         fail("generate_timers.py", e)
 
 
-# --- 8. systemd templates ---
+# --- 10. systemd templates ---
 
 def test_systemd_templates():
     systemd_dir = REPO_ROOT / "systemd"
@@ -229,6 +260,7 @@ def main():
 
     test_tool_imports()
     test_llm_imports()
+    test_connector_imports()
     test_agent_syntax()
     test_script_syntax()
     test_config_template()
